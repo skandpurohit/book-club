@@ -5,6 +5,9 @@
  */
 
 const App = (() => {
+  // ── Firestore instance (set in init if Firebase is configured) ──
+  let db = null;
+
   // ── Storage Keys ────────────────────────────────────────
   const KEYS = {
     session:  'bookclub_session',
@@ -47,24 +50,70 @@ const App = (() => {
       state.config   = config;
       state.sessions = booksData.sessions || [];
 
-      // Merge seed JSON with localStorage (local wins on conflict)
-      state.members  = mergeById(seedMembers.members  || [], localGet(KEYS.members));
-      state.ratings  = mergeById(seedRatings.ratings  || [], localGet(KEYS.ratings));
-      state.comments = mergeById(seedComments.comments || [], localGet(KEYS.comments));
+      // ── Try to initialise Firestore ──────────────────────
+      try {
+        if (typeof FIREBASE_CONFIG !== 'undefined' &&
+            !FIREBASE_CONFIG.projectId.startsWith('REPLACE')) {
+          if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+          db = firebase.firestore();
+        }
+      } catch (e) {
+        console.warn('[App] Firebase unavailable, using localStorage:', e.message);
+      }
 
-      // Upcoming session: prefer localStorage (admin-set) over JSON flag
-      const localUpcoming = (() => {
-        try { return JSON.parse(localStorage.getItem(KEYS.upcoming)); } catch { return null; }
-      })();
-      state.upcomingSession = localUpcoming
-        || state.sessions.find(s => s.isUpcoming && !s.isCurrent)
-        || null;
+      if (db) {
+        // ── Load from Firestore ────────────────────────────
+        const [membersSnap, ratingsSnap, commentsSnap, upcomingSnap] = await Promise.all([
+          db.collection('members').get(),
+          db.collection('ratings').get(),
+          db.collection('comments').get(),
+          db.collection('upcoming').doc('current').get(),
+        ]);
+
+        state.members  = membersSnap.docs.map(d => d.data());
+        state.ratings  = ratingsSnap.docs.map(d => d.data());
+        state.comments = commentsSnap.docs.map(d => d.data());
+        state.upcomingSession = upcomingSnap.exists ? upcomingSnap.data() : null;
+
+        // Auto-seed Firestore on first run (collections empty → import JSON)
+        if (state.members.length === 0 && seedMembers.members.length > 0) {
+          await _seedCollection('members', seedMembers.members);
+          state.members = seedMembers.members;
+        }
+        if (state.ratings.length === 0 && seedRatings.ratings.length > 0) {
+          await _seedCollection('ratings', seedRatings.ratings);
+          state.ratings = seedRatings.ratings;
+        }
+        if (state.comments.length === 0 && seedComments.comments.length > 0) {
+          await _seedCollection('comments', seedComments.comments);
+          state.comments = seedComments.comments;
+        }
+      } else {
+        // ── Fallback: merge seed JSON with localStorage ────
+        state.members  = mergeById(seedMembers.members  || [], localGet(KEYS.members));
+        state.ratings  = mergeById(seedRatings.ratings  || [], localGet(KEYS.ratings));
+        state.comments = mergeById(seedComments.comments || [], localGet(KEYS.comments));
+
+        const localUpcoming = (() => {
+          try { return JSON.parse(localStorage.getItem(KEYS.upcoming)); } catch { return null; }
+        })();
+        state.upcomingSession = localUpcoming
+          || state.sessions.find(s => s.isUpcoming && !s.isCurrent)
+          || null;
+      }
 
       state.ready = true;
     } catch (err) {
       console.error('[App] init error:', err);
       throw err;
     }
+  }
+
+  // Batch-write an array of docs into a Firestore collection
+  async function _seedCollection(collectionName, docs) {
+    const batch = db.batch();
+    docs.forEach(doc => batch.set(db.collection(collectionName).doc(doc.id), doc));
+    await batch.commit();
   }
 
   function mergeById(seed, local) {
@@ -168,7 +217,7 @@ const App = (() => {
    * Register a new member (local-only; admin must export and commit to make permanent).
    * Returns the member object (existing or new).
    */
-  function registerMember(name) {
+  async function registerMember(name) {
     const trimmed = name.trim();
     const existing = findMemberByName(trimmed);
     if (existing) return existing;
@@ -181,9 +230,13 @@ const App = (() => {
     };
 
     state.members.push(member);
-    const local = localGet(KEYS.members);
-    local.push(member);
-    localSet(KEYS.members, local);
+    if (db) {
+      await db.collection('members').doc(member.id).set(member);
+    } else {
+      const local = localGet(KEYS.members);
+      local.push(member);
+      localSet(KEYS.members, local);
+    }
     return member;
   }
 
@@ -203,7 +256,7 @@ const App = (() => {
   const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June',
                        'July', 'August', 'September', 'October', 'November', 'December'];
 
-  function saveUpcomingBook({ month, year, title, author, genre, pages, isbn,
+  async function saveUpcomingBook({ month, year, title, author, genre, pages, isbn,
                                selectedBy, selectedById, description, prompts, coverColor }) {
     const monthStr = String(month).padStart(2, '0');
     const session = {
@@ -229,8 +282,21 @@ const App = (() => {
         spoilerPrompts:  [],
       }]
     };
-    localStorage.setItem(KEYS.upcoming, JSON.stringify(session));
+    if (db) {
+      await db.collection('upcoming').doc('current').set(session);
+    } else {
+      localStorage.setItem(KEYS.upcoming, JSON.stringify(session));
+    }
     state.upcomingSession = session;
+  }
+
+  async function clearUpcomingBook() {
+    state.upcomingSession = null;
+    if (db) {
+      await db.collection('upcoming').doc('current').delete();
+    } else {
+      localStorage.removeItem(KEYS.upcoming);
+    }
   }
 
   function exportBooksJson() {
@@ -289,7 +355,7 @@ const App = (() => {
   /**
    * Save or update a rating. Throws if editing is disabled and rating already exists.
    */
-  function saveRating(data) {
+  async function saveRating(data) {
     const existing = getMemberRatingForBook(data.bookId, data.memberId);
 
     if (existing) {
@@ -297,13 +363,21 @@ const App = (() => {
         throw new Error('You have already rated this book. Editing ratings is disabled by the admin.');
       }
       Object.assign(existing, data, { updatedAt: new Date().toISOString() });
-      _persistLocalUpdate(KEYS.ratings, existing);
+      if (db) {
+        await db.collection('ratings').doc(existing.id).set(existing);
+      } else {
+        _persistLocalUpdate(KEYS.ratings, existing);
+      }
     } else {
       const rating = { id: generateId('rating'), timestamp: new Date().toISOString(), ...data };
       state.ratings.push(rating);
-      const local = localGet(KEYS.ratings);
-      local.push(rating);
-      localSet(KEYS.ratings, local);
+      if (db) {
+        await db.collection('ratings').doc(rating.id).set(rating);
+      } else {
+        const local = localGet(KEYS.ratings);
+        local.push(rating);
+        localSet(KEYS.ratings, local);
+      }
     }
   }
 
@@ -318,7 +392,7 @@ const App = (() => {
     return state.comments.find(c => c.bookId === bookId && c.memberId === memberId) || null;
   }
 
-  function saveComment(data) {
+  async function saveComment(data) {
     const existing = getMemberCommentForBook(data.bookId, data.memberId);
 
     if (existing) {
@@ -326,13 +400,21 @@ const App = (() => {
         throw new Error('You have already shared thoughts on this book. Editing is disabled by the admin.');
       }
       Object.assign(existing, data, { updatedAt: new Date().toISOString() });
-      _persistLocalUpdate(KEYS.comments, existing);
+      if (db) {
+        await db.collection('comments').doc(existing.id).set(existing);
+      } else {
+        _persistLocalUpdate(KEYS.comments, existing);
+      }
     } else {
       const comment = { id: generateId('comment'), timestamp: new Date().toISOString(), ...data };
       state.comments.push(comment);
-      const local = localGet(KEYS.comments);
-      local.push(comment);
-      localSet(KEYS.comments, local);
+      if (db) {
+        await db.collection('comments').doc(comment.id).set(comment);
+      } else {
+        const local = localGet(KEYS.comments);
+        local.push(comment);
+        localSet(KEYS.comments, local);
+      }
     }
   }
 
@@ -484,7 +566,7 @@ const App = (() => {
 
     // Books
     getCurrentSession, getPastSessions, getBookById,
-    getUpcomingSession, saveUpcomingBook, exportBooksJson, MONTH_NAMES,
+    getUpcomingSession, saveUpcomingBook, clearUpcomingBook, exportBooksJson, MONTH_NAMES,
 
     // Ratings
     getRatingsForBook, getMemberRatingForBook, averageRating, recommendPercent, saveRating,

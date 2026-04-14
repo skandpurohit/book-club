@@ -168,19 +168,22 @@ function buildInlineRating(book, session, myRating) {
       return;
     }
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const stars = widget.getValue();
       if (!stars) { App.showToast('Please pick a star rating first.', 'warning'); return; }
       const rec = form.querySelector('.rec-checkbox') ? form.querySelector('.rec-checkbox').checked : false;
 
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
       try {
-        App.saveRating({ bookId: book.id, memberId: session.memberId, memberName: session.memberName, stars, wouldRecommend: rec });
+        await App.saveRating({ bookId: book.id, memberId: session.memberId, memberName: session.memberName, stars, wouldRecommend: rec });
         App.showToast(myRating ? 'Rating updated!' : 'Rating saved — thanks!', 'success');
         saveBtn.textContent = '✓ Saved';
-        saveBtn.disabled = true;
         setTimeout(() => location.reload(), 1000);
       } catch (e) {
         App.showToast(e.message, 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = myRating ? 'Update rating' : 'Save rating';
       }
     });
   }, 0);
@@ -367,14 +370,14 @@ function initAdminForm() {
   document.getElementById('book-cover-color').addEventListener('input', updateColorChip);
 
   // Clear button
-  document.getElementById('clear-upcoming-btn').addEventListener('click', () => {
-    localStorage.removeItem(App.KEYS.upcoming);
+  document.getElementById('clear-upcoming-btn').addEventListener('click', async () => {
+    await App.clearUpcomingBook();
     App.showToast('Upcoming book cleared.', 'info');
     location.reload();
   });
 
   // Form submit
-  document.getElementById('add-book-form').addEventListener('submit', e => {
+  document.getElementById('add-book-form').addEventListener('submit', async e => {
     e.preventDefault();
     const memberSelEl = document.getElementById('book-selected-by');
     const selectedOpt = memberSelEl.options[memberSelEl.selectedIndex];
@@ -398,15 +401,23 @@ function initAdminForm() {
       return;
     }
 
-    App.saveUpcomingBook(data);
-    App.showToast('Upcoming book saved! Export books.json to share with members.', 'success');
-    document.getElementById('clear-upcoming-btn').classList.remove('hidden');
-
-    // Refresh upcoming section
-    const upcomingSection = document.getElementById('upcoming-section');
-    upcomingSection.classList.add('hidden');
-    document.getElementById('upcoming-content').innerHTML = '';
-    renderUpcomingSection();
+    const submitBtn = document.querySelector('#add-book-form button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+    try {
+      await App.saveUpcomingBook(data);
+      App.showToast('Upcoming book saved — all members will see it after you push!', 'success');
+      document.getElementById('clear-upcoming-btn').classList.remove('hidden');
+      // Refresh upcoming section
+      document.getElementById('upcoming-section').classList.add('hidden');
+      document.getElementById('upcoming-content').innerHTML = '';
+      renderUpcomingSection();
+    } catch (err) {
+      App.showToast('Could not save: ' + err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Save Upcoming Book';
+    }
   });
 }
 

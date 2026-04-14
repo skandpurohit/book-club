@@ -176,13 +176,10 @@
           <button class="btn btn--accent btn--sm" onclick="exportBooksJson()">
             📚 Export books.json
           </button>
-          <button class="btn btn--secondary btn--sm" onclick="exportData()">
-            ⬇ Export members / ratings / comments
-          </button>
         </div>
         <p style="font-size:0.75rem;color:var(--clr-text-muted);margin-top:0.75rem">
           Replace <code>data/books.json</code> with the downloaded file, then commit and push to GitHub.
-          Members and activity data go into <code>data/members.json</code>, <code>data/ratings.json</code>, <code>data/comments.json</code>.
+          Member ratings and comments are saved directly to Firestore — no export needed.
         </p>
       </div>
 
@@ -210,6 +207,9 @@
   Page Turners Book Club · Data stored locally in your browser
 </footer>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 <script src="js/app.js"></script>
 <script src="js/dashboard.js"></script>
 <script>

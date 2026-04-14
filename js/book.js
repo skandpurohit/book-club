@@ -150,16 +150,21 @@ function renderRatingPanel(book, session) {
     return;
   }
 
-  document.getElementById('save-rating-btn').addEventListener('click', () => {
+  document.getElementById('save-rating-btn').addEventListener('click', async () => {
     const stars = widget.getValue();
     if (!stars) { App.showToast('Please select a rating first.', 'warning'); return; }
     const rec = document.getElementById('rec-check').checked;
+    const btn = document.getElementById('save-rating-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
     try {
-      App.saveRating({ bookId: book.id, memberId: session.memberId, memberName: session.memberName, stars, wouldRecommend: rec });
+      await App.saveRating({ bookId: book.id, memberId: session.memberId, memberName: session.memberName, stars, wouldRecommend: rec });
       App.showToast(myRating ? 'Rating updated!' : 'Rating saved — thank you!', 'success');
       setTimeout(() => location.reload(), 900);
     } catch (e) {
       App.showToast(e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = myRating ? 'Update Rating' : 'Save Rating';
     }
   });
 }
@@ -207,7 +212,7 @@ function renderDiscussionForm(book, session) {
     section.querySelector('#form-submit-btn').textContent = 'Update Response';
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const liked         = form.querySelector('#field-liked').value.trim();
     const disliked      = form.querySelector('#field-disliked').value.trim();
@@ -227,7 +232,7 @@ function renderDiscussionForm(book, session) {
     btn.textContent = 'Saving…';
 
     try {
-      App.saveComment({
+      await App.saveComment({
         bookId: book.id,
         memberId: session.memberId,
         memberName: session.memberName,
@@ -352,17 +357,20 @@ function renderSpoilerSection(book, session) {
     spoilerInput.value = existingComment.spoilerThoughts;
   }
 
-  document.getElementById('spoiler-save-btn').addEventListener('click', () => {
+  document.getElementById('spoiler-save-btn').addEventListener('click', async () => {
     const text = spoilerInput.value.trim();
     if (!text) { App.showToast('Write something first.', 'warning'); return; }
 
-    // Save as part of the comment (or create minimal comment)
+    const saveBtn = document.getElementById('spoiler-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
     const existing = App.getMemberCommentForBook(book.id, session.memberId);
     try {
       if (existing) {
-        App.saveComment({ ...existing, spoilerThoughts: text });
+        await App.saveComment({ ...existing, spoilerThoughts: text });
       } else {
-        App.saveComment({
+        await App.saveComment({
           bookId: book.id, memberId: session.memberId, memberName: session.memberName,
           liked: '', disliked: '', favoriteCharacter: '', favoriteQuote: '',
           discussionThoughts: '', wouldRecommend: null, spoilerThoughts: text,
@@ -372,6 +380,9 @@ function renderSpoilerSection(book, session) {
       renderSpoilerResponses(book, session);
     } catch (e) {
       App.showToast(e.message, 'error');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Spoiler Thoughts';
     }
   });
 }
