@@ -85,25 +85,107 @@
     </div>
   </section>
 
+  <!-- Upcoming Book (visible to all once set, populated by JS) -->
+  <section class="section hidden" id="upcoming-section" aria-label="Next month's book">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title">
+          Coming Next Month
+          <span class="section__title-tag section__title-tag--upcoming">Upcoming</span>
+        </h2>
+      </div>
+      <div id="upcoming-content"></div>
+    </div>
+  </section>
+
   <!-- Admin Panel (hidden unless admin) -->
   <section class="section hidden" id="admin-section" aria-label="Admin panel">
     <div class="section__inner">
-      <div class="admin-panel">
-        <div class="admin-panel__title">⚙ Admin Tools</div>
+
+      <!-- Add Next Month's Book -->
+      <div class="admin-panel" id="admin-add-book-panel">
+        <div class="admin-panel__title">📅 Add Next Month's Book</div>
+        <p style="font-size:0.85rem;color:var(--clr-text-muted);margin-bottom:1.25rem">
+          Fill in the details below. The book will appear in the "Coming Next Month" section for all members
+          once you export and commit the updated <code>books.json</code>.
+        </p>
+        <form id="add-book-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="book-month">Month *</label>
+              <select id="book-month" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label for="book-year">Year *</label>
+              <input type="number" id="book-year" class="form-control" min="2024" max="2030" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="book-title">Title *</label>
+            <input type="text" id="book-title" class="form-control" placeholder="e.g. The Midnight Library" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="book-author">Author *</label>
+              <input type="text" id="book-author" class="form-control" placeholder="e.g. Matt Haig" required>
+            </div>
+            <div class="form-group">
+              <label for="book-genre">Genre</label>
+              <input type="text" id="book-genre" class="form-control" placeholder="e.g. Fiction, Non-Fiction">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="book-pages">Pages</label>
+              <input type="number" id="book-pages" class="form-control" min="1" placeholder="288">
+            </div>
+            <div class="form-group">
+              <label for="book-selected-by">Selected By</label>
+              <select id="book-selected-by" class="form-control"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="book-description">Description</label>
+            <textarea id="book-description" class="form-control" rows="3" placeholder="A short summary of the book…"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="book-prompts">Discussion Prompts <span style="font-weight:400;color:var(--clr-text-muted)">(one per line)</span></label>
+            <textarea id="book-prompts" class="form-control" rows="4" placeholder="What did you find most surprising?&#10;Which character resonated with you?"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="book-cover-color">Cover Colour</label>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <input type="color" id="book-cover-color" value="#2C3E50" style="width:2.5rem;height:2.5rem;border:none;background:none;cursor:pointer;padding:0">
+              <span id="cover-color-preview" class="cover-color-chip"></span>
+            </div>
+          </div>
+          <div class="admin-panel__actions" style="margin-top:0.5rem">
+            <button type="submit" class="btn btn--accent">💾 Save Upcoming Book</button>
+            <button type="button" id="clear-upcoming-btn" class="btn btn--ghost btn--sm hidden">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Export Tools -->
+      <div class="admin-panel" style="margin-top:1rem">
+        <div class="admin-panel__title">⚙ Export & Commit</div>
         <p style="font-size:0.85rem;color:var(--clr-text-muted);margin-bottom:0.75rem">
-          Export all locally stored data (new members, ratings, comments) so you can commit it back to the repository.
+          Download updated data files and commit them to GitHub to share with all members.
         </p>
         <div class="admin-panel__actions">
-          <button class="btn btn--accent btn--sm" onclick="exportData()">
-            ⬇ Export Local Data as JSON
+          <button class="btn btn--accent btn--sm" onclick="exportBooksJson()">
+            📚 Export books.json
           </button>
-          <a href="archive.html" class="btn btn--secondary btn--sm">View Archive</a>
+          <button class="btn btn--secondary btn--sm" onclick="exportData()">
+            ⬇ Export members / ratings / comments
+          </button>
         </div>
         <p style="font-size:0.75rem;color:var(--clr-text-muted);margin-top:0.75rem">
-          After downloading, open the JSON, copy the arrays into <code>data/members.json</code>,
-          <code>data/ratings.json</code>, and <code>data/comments.json</code>, then commit and push to GitHub.
+          Replace <code>data/books.json</code> with the downloaded file, then commit and push to GitHub.
+          Members and activity data go into <code>data/members.json</code>, <code>data/ratings.json</code>, <code>data/comments.json</code>.
         </p>
       </div>
+
     </div>
   </section>
 

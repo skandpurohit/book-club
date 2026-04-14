@@ -1111,6 +1111,101 @@ textarea.form-control {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+/* ── Upcoming Book ───────────────────────────────────────── */
+.section__title-tag--upcoming {
+  background: #1D4ED8;
+  color: #fff;
+}
+
+.upcoming-book-card {
+  display: flex;
+  gap: 1.5rem;
+  background: var(--clr-card);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  max-width: 720px;
+}
+
+.upcoming-book-card__cover {
+  flex-shrink: 0;
+  width: 130px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.75rem;
+  position: relative;
+}
+
+.upcoming-book-card__body {
+  padding: 1.25rem 1.25rem 1.25rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.upcoming-book-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--clr-text-muted);
+}
+
+.upcoming-book-card__label {
+  font-weight: 700;
+  color: var(--clr-primary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.upcoming-book-card__desc {
+  font-size: 0.9rem;
+  color: var(--clr-text-mid);
+  line-height: 1.55;
+}
+
+.upcoming-book-card__prompts-preview {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.upcoming-book-card__prompts-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--clr-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.upcoming-book-card__prompts-preview ul {
+  list-style: disc;
+  padding-left: 1.1rem;
+  color: var(--clr-text-mid);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* ── Cover Colour Chip ───────────────────────────────────── */
+.cover-color-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(0,0,0,0.1);
+  min-width: 5rem;
+  text-align: center;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 700px) {
   .page-hero__title { font-size: 1.5rem; }
@@ -1120,6 +1215,9 @@ textarea.form-control {
   .site-header__inner { flex-wrap: wrap; gap: 0.5rem; }
   .site-nav { flex-wrap: wrap; }
   .books-grid { grid-template-columns: 1fr; }
+  .upcoming-book-card { flex-direction: column; }
+  .upcoming-book-card__cover { width: 100%; min-height: 130px; }
+  .upcoming-book-card__body { padding: 1rem; }
   .responses-grid { grid-template-columns: 1fr; }
   .archive-grid { grid-template-columns: 1fr; }
   .stats-bar__inner { gap: 1.25rem; }

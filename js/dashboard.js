@@ -58,12 +58,16 @@
     grid.appendChild(buildBookCard(book, session));
   });
 
+  // ── Upcoming Book ──────────────────────────────────────
+  renderUpcomingSection();
+
   // ── Recent Responses ───────────────────────────────────
   renderRecentResponses(currentSession);
 
   // ── Admin Panel ────────────────────────────────────────
   if (member && member.isAdmin) {
     document.getElementById('admin-section').classList.remove('hidden');
+    initAdminForm();
   }
 })();
 
@@ -268,7 +272,157 @@ function buildResponseCard(comment, book) {
   return card;
 }
 
+// ── Upcoming Book ──────────────────────────────────────────
+function renderUpcomingSection() {
+  const upcoming = App.getUpcomingSession();
+  if (!upcoming || !upcoming.books || !upcoming.books.length) return;
+
+  document.getElementById('upcoming-section').classList.remove('hidden');
+  const book = upcoming.books[0];
+  const container = document.getElementById('upcoming-content');
+
+  const card = document.createElement('div');
+  card.className = 'upcoming-book-card';
+  card.innerHTML = `
+    <div class="upcoming-book-card__cover" style="background:${book.coverColor};color:${book.coverTextColor}">
+      ${book.genre ? `<span class="book-card__genre-badge" style="color:${book.coverTextColor}">${esc(book.genre)}</span>` : ''}
+      <div class="book-card__cover-text">
+        <div class="book-card__title">${esc(book.title)}</div>
+        <div class="book-card__author">${esc(book.author)}</div>
+      </div>
+    </div>
+    <div class="upcoming-book-card__body">
+      <div class="upcoming-book-card__meta">
+        <span class="upcoming-book-card__label">${esc(upcoming.label)}</span>
+        ${book.pages ? `<span>📖 ${book.pages} pages</span>` : ''}
+        ${book.selectedBy ? `<span>🎯 Picked by ${esc(book.selectedBy)}</span>` : ''}
+      </div>
+      ${book.description ? `<p class="upcoming-book-card__desc">${esc(book.description)}</p>` : ''}
+      ${book.discussionPrompts && book.discussionPrompts.length
+        ? `<div class="upcoming-book-card__prompts-preview">
+             <div class="upcoming-book-card__prompts-label">Discussion prompts</div>
+             <ul>${book.discussionPrompts.slice(0, 3).map(p =>
+               `<li>${esc(p)}</li>`).join('')}
+               ${book.discussionPrompts.length > 3
+                 ? `<li style="color:var(--clr-text-muted)">…and ${book.discussionPrompts.length - 3} more</li>`
+                 : ''}
+             </ul>
+           </div>`
+        : ''}
+    </div>`;
+  container.appendChild(card);
+}
+
+// ── Admin Form ─────────────────────────────────────────────
+function initAdminForm() {
+  // Populate month dropdown
+  const monthSel = document.getElementById('book-month');
+  App.MONTH_NAMES.slice(1).forEach((name, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = name;
+    monthSel.appendChild(opt);
+  });
+
+  // Default to next calendar month
+  const now = new Date();
+  const nextMonth = now.getMonth() + 2 > 12 ? 1 : now.getMonth() + 2;
+  const nextYear  = now.getMonth() + 2 > 12 ? now.getFullYear() + 1 : now.getFullYear();
+  monthSel.value = nextMonth;
+  document.getElementById('book-year').value = nextYear;
+
+  // Populate "selected by" dropdown
+  const memberSel = document.getElementById('book-selected-by');
+  const blankOpt  = document.createElement('option');
+  blankOpt.value  = '';
+  blankOpt.textContent = '— choose member —';
+  memberSel.appendChild(blankOpt);
+  App.getAllMembers().forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.dataset.name = m.name;
+    opt.textContent  = m.name;
+    memberSel.appendChild(opt);
+  });
+
+  // Pre-fill if upcoming already saved
+  const existing = App.getUpcomingSession();
+  if (existing && existing.books && existing.books.length) {
+    const b = existing.books[0];
+    const [yr, mo] = existing.id.split('-');
+    monthSel.value = parseInt(mo);
+    document.getElementById('book-year').value        = yr;
+    document.getElementById('book-title').value       = b.title;
+    document.getElementById('book-author').value      = b.author;
+    document.getElementById('book-genre').value       = b.genre || '';
+    document.getElementById('book-pages').value       = b.pages || '';
+    document.getElementById('book-description').value = b.description || '';
+    document.getElementById('book-prompts').value     = (b.discussionPrompts || []).join('\n');
+    document.getElementById('book-cover-color').value = b.coverColor || '#2C3E50';
+    if (b.selectedById) memberSel.value = b.selectedById;
+    document.getElementById('clear-upcoming-btn').classList.remove('hidden');
+  }
+
+  updateColorChip();
+  document.getElementById('book-cover-color').addEventListener('input', updateColorChip);
+
+  // Clear button
+  document.getElementById('clear-upcoming-btn').addEventListener('click', () => {
+    localStorage.removeItem(App.KEYS.upcoming);
+    App.showToast('Upcoming book cleared.', 'info');
+    location.reload();
+  });
+
+  // Form submit
+  document.getElementById('add-book-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const memberSelEl = document.getElementById('book-selected-by');
+    const selectedOpt = memberSelEl.options[memberSelEl.selectedIndex];
+
+    const data = {
+      month:        parseInt(document.getElementById('book-month').value),
+      year:         parseInt(document.getElementById('book-year').value),
+      title:        document.getElementById('book-title').value,
+      author:       document.getElementById('book-author').value,
+      genre:        document.getElementById('book-genre').value,
+      pages:        document.getElementById('book-pages').value,
+      selectedBy:   selectedOpt && selectedOpt.dataset.name ? selectedOpt.dataset.name : '',
+      selectedById: memberSelEl.value,
+      description:  document.getElementById('book-description').value,
+      prompts:      document.getElementById('book-prompts').value,
+      coverColor:   document.getElementById('book-cover-color').value,
+    };
+
+    if (!data.title || !data.author) {
+      App.showToast('Title and Author are required.', 'error');
+      return;
+    }
+
+    App.saveUpcomingBook(data);
+    App.showToast('Upcoming book saved! Export books.json to share with members.', 'success');
+    document.getElementById('clear-upcoming-btn').classList.remove('hidden');
+
+    // Refresh upcoming section
+    const upcomingSection = document.getElementById('upcoming-section');
+    upcomingSection.classList.add('hidden');
+    document.getElementById('upcoming-content').innerHTML = '';
+    renderUpcomingSection();
+  });
+}
+
+function updateColorChip() {
+  const color = document.getElementById('book-cover-color').value;
+  const chip  = document.getElementById('cover-color-preview');
+  chip.style.background = color;
+  chip.textContent = color.toUpperCase();
+}
+
 // ── Admin ──────────────────────────────────────────────────
+function exportBooksJson() {
+  App.exportBooksJson();
+  App.showToast('books.json downloaded — replace data/books.json and push to GitHub.', 'success');
+}
+
 function exportData() {
   App.exportLocalData();
   App.showToast('Export downloaded!', 'success');

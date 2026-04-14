@@ -12,16 +12,18 @@ const App = (() => {
     ratings:  'bookclub_ratings',
     comments: 'bookclub_comments',
     access:   'bookclub_access_granted',
+    upcoming: 'bookclub_upcoming',
   };
 
   // ── State ────────────────────────────────────────────────
   const state = {
-    config:   null,
-    sessions: [],   // month sessions from books.json
-    members:  [],
-    ratings:  [],
-    comments: [],
-    ready:    false,
+    config:          null,
+    sessions:        [],   // month sessions from books.json
+    members:         [],
+    ratings:         [],
+    comments:        [],
+    upcomingSession: null, // next month's book (admin-set)
+    ready:           false,
   };
 
   // ── Data Loading ─────────────────────────────────────────
@@ -49,6 +51,14 @@ const App = (() => {
       state.members  = mergeById(seedMembers.members  || [], localGet(KEYS.members));
       state.ratings  = mergeById(seedRatings.ratings  || [], localGet(KEYS.ratings));
       state.comments = mergeById(seedComments.comments || [], localGet(KEYS.comments));
+
+      // Upcoming session: prefer localStorage (admin-set) over JSON flag
+      const localUpcoming = (() => {
+        try { return JSON.parse(localStorage.getItem(KEYS.upcoming)); } catch { return null; }
+      })();
+      state.upcomingSession = localUpcoming
+        || state.sessions.find(s => s.isUpcoming && !s.isCurrent)
+        || null;
 
       state.ready = true;
     } catch (err) {
@@ -183,7 +193,67 @@ const App = (() => {
   }
 
   function getPastSessions() {
-    return state.sessions.filter(s => !s.isCurrent).reverse();
+    return state.sessions.filter(s => !s.isCurrent && !s.isUpcoming).reverse();
+  }
+
+  function getUpcomingSession() {
+    return state.upcomingSession;
+  }
+
+  const MONTH_NAMES = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+
+  function saveUpcomingBook({ month, year, title, author, genre, pages, isbn,
+                               selectedBy, selectedById, description, prompts, coverColor }) {
+    const monthStr = String(month).padStart(2, '0');
+    const session = {
+      id:         `${year}-${monthStr}`,
+      label:      `${MONTH_NAMES[month]} ${year}`,
+      isCurrent:  false,
+      isUpcoming: true,
+      books: [{
+        id:              generateId('book'),
+        title:           title.trim(),
+        author:          author.trim(),
+        genre:           (genre || '').trim(),
+        pages:           parseInt(pages) || 0,
+        isbn:            (isbn || '').trim(),
+        coverColor:      coverColor || '#2C3E50',
+        coverTextColor:  '#FFFFFF',
+        selectedBy:      (selectedBy || '').trim(),
+        selectedById:    (selectedById || '').trim(),
+        description:     (description || '').trim(),
+        discussionPrompts: prompts
+          ? prompts.split('\n').map(s => s.trim()).filter(Boolean)
+          : [],
+        spoilerPrompts:  [],
+      }]
+    };
+    localStorage.setItem(KEYS.upcoming, JSON.stringify(session));
+    state.upcomingSession = session;
+  }
+
+  function exportBooksJson() {
+    // Build a complete books.json with all sessions + upcoming
+    const allSessions = state.sessions
+      .filter(s => !s.isUpcoming)         // strip any old upcoming flags
+      .map(s => ({ ...s, isUpcoming: undefined }));  // clean flag
+
+    if (state.upcomingSession) {
+      // Replace if same id already in list (e.g. admin re-editing), else append
+      const idx = allSessions.findIndex(s => s.id === state.upcomingSession.id);
+      if (idx >= 0) allSessions[idx] = state.upcomingSession;
+      else allSessions.push(state.upcomingSession);
+    }
+
+    const blob = new Blob([JSON.stringify({ sessions: allSessions }, null, 2)],
+                          { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    Object.assign(document.createElement('a'), {
+      href: url,
+      download: 'books.json',
+    }).click();
+    URL.revokeObjectURL(url);
   }
 
   function getBookById(bookId) {
@@ -414,6 +484,7 @@ const App = (() => {
 
     // Books
     getCurrentSession, getPastSessions, getBookById,
+    getUpcomingSession, saveUpcomingBook, exportBooksJson, MONTH_NAMES,
 
     // Ratings
     getRatingsForBook, getMemberRatingForBook, averageRating, recommendPercent, saveRating,
