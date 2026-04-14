@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Discussion — Page Turners</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+    <a href="dashboard.html" class="site-logo" aria-label="Page Turners home">
+      <span class="site-logo__icon" aria-hidden="true">📚</span>
+      Page Turners
+    </a>
+    <nav class="site-nav" role="navigation" aria-label="Main navigation">
+      <a href="dashboard.html" class="site-nav__link">Dashboard</a>
+      <a href="archive.html"   class="site-nav__link">Archive</a>
+      <div class="nav-divider" aria-hidden="true"></div>
+      <a href="#" id="admin-nav-link" class="site-nav__link hidden">⚙ Admin</a>
+      <div class="nav-user">
+        <span>👤</span>
+        <span class="nav-user__name" id="nav-member-name">…</span>
+        <button onclick="App.switchMember()" class="btn btn--ghost btn--sm" style="font-size:0.78rem;padding:0.25rem 0.6rem" title="Switch member">Switch</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content" role="main">
+
+  <!-- ── Book Header Section ──────────────────────────────── -->
+  <section class="section" aria-label="Book information">
+    <div class="section__inner">
+
+      <div style="margin-bottom:1.25rem">
+        <a href="dashboard.html" class="back-link" id="back-link">← Dashboard</a>
+        <span style="font-size:0.8rem;color:var(--clr-text-muted);margin-left:0.5rem" id="book-month"></span>
+      </div>
+
+      <div class="book-detail-header">
+        <div class="book-detail-cover" id="book-cover" style="background:#555;color:#fff">
+          <!-- populated by JS -->
+        </div>
+        <div class="book-detail-info">
+          <h1 class="book-detail-title" id="book-title">Loading…</h1>
+          <p class="book-detail-author" id="book-author"></p>
+          <div class="book-detail-meta">
+            <span id="book-genre"></span>
+            <span id="book-pages"></span>
+            <span id="book-isbn"></span>
+            <span id="book-selected"></span>
+          </div>
+          <p class="book-detail-desc" id="book-desc"></p>
+          <div class="book-detail-stats" id="book-stats"></div>
+        </div>
+      </div>
+
+      <!-- Recommendation Poll Bar -->
+      <div id="rec-poll-wrap" class="rec-poll mt-3" style="max-width:400px">
+        <div style="font-size:0.82rem;font-weight:600;color:var(--clr-text-mid);margin-bottom:0.3rem">
+          Would members recommend this book?
+        </div>
+        <div class="rec-poll__bar">
+          <div class="rec-poll__fill" id="rec-poll-fill" style="width:0%"></div>
+        </div>
+        <div class="rec-poll__labels">
+          <span id="rec-poll-pct">—</span>
+          <span id="rec-poll-count"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Your Rating ───────────────────────────────────────── -->
+  <section class="section section--alt" aria-label="Your rating" id="rating-section">
+    <div class="section__inner" style="max-width:var(--max-w-narrow);margin:0 auto">
+      <h2 class="section__title" style="margin-bottom:1rem">Your Rating</h2>
+      <div class="rating-panel" id="rating-panel">
+        <div class="loading-spinner" style="width:24px;height:24px;border-width:2px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Discussion Prompts ────────────────────────────────── -->
+  <section class="section" aria-label="Discussion prompts" id="prompts-section">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title">Discussion Prompts</h2>
+        <span class="badge badge--info">Use these in your response below</span>
+      </div>
+      <ul id="prompts-list"></ul>
+    </div>
+  </section>
+
+  <!-- ── Share Your Thoughts Form ──────────────────────────── -->
+  <section class="section section--alt" id="discussion-form-section" aria-label="Share your thoughts">
+    <div class="section__inner" style="max-width:780px;margin:0 auto">
+      <div class="discussion-form">
+        <h2 class="discussion-form__title">Share Your Thoughts</h2>
+        <p class="discussion-form__sub">All fields are optional — share as much or as little as you like.</p>
+
+        <form id="discussion-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="field-liked">What did you like? ✨</label>
+              <textarea id="field-liked" class="form-control" rows="3"
+                placeholder="What worked for you, what drew you in…"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="field-disliked">What didn't work? 🤔</label>
+              <textarea id="field-disliked" class="form-control" rows="3"
+                placeholder="Pacing, characters, the ending…"></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="field-char">Favourite character</label>
+              <input type="text" id="field-char" class="form-control"
+                placeholder="And why?" maxlength="120">
+            </div>
+            <div class="form-group">
+              <label for="field-wouldrecommend">Would you recommend it?</label>
+              <select id="field-wouldrecommend" class="form-control">
+                <option value="">— Choose —</option>
+                <option value="yes">👍 Yes, definitely</option>
+                <option value="no">👎 Not for everyone</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="field-quote">Favourite quote</label>
+            <input type="text" id="field-quote" class="form-control"
+              placeholder="The line that stuck with you…" maxlength="300">
+          </div>
+
+          <div class="form-group">
+            <label for="field-thoughts">Discussion thoughts / themes</label>
+            <textarea id="field-thoughts" class="form-control" rows="4"
+              placeholder="What themes did you see? What would you bring up at the meeting? What lingered after you finished?"></textarea>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+            <button type="submit" class="btn btn--primary btn--lg" id="form-submit-btn">
+              Share Response
+            </button>
+            <p class="form-hint" style="margin:0">
+              Your response will be visible to all club members.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Member Responses ──────────────────────────────────── -->
+  <section class="section" aria-label="Member responses">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title" id="responses-count">Member Responses</h2>
+      </div>
+      <div id="responses-container">
+        <div class="loading-state">
+          <div class="loading-spinner" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Spoiler Section ────────────────────────────────────── -->
+  <section class="section section--alt" id="spoiler-wrap" aria-label="Spoiler discussion">
+    <div class="section__inner">
+      <h2 class="section__title" style="margin-bottom:1rem">Spoiler Zone</h2>
+      <div class="spoiler-section">
+        <button class="spoiler-toggle" id="spoiler-toggle" aria-expanded="false" aria-controls="spoiler-body">
+          <span class="spoiler-toggle__label">
+            🔒 Reveal spoiler discussion
+            <span class="spoiler-toggle__warning">Spoilers Inside</span>
+          </span>
+          <span class="spoiler-toggle__icon" aria-hidden="true">▼</span>
+        </button>
+        <div class="spoiler-body" id="spoiler-body" role="region">
+          <p style="color:rgba(232,213,176,0.7);font-size:0.82rem;margin-bottom:1rem">
+            These prompts and responses contain plot spoilers. Only read after finishing the book.
+          </p>
+          <ul id="spoiler-prompts" class="prompts-list"></ul>
+
+          <div class="spoiler-form">
+            <div class="form-group">
+              <label for="spoiler-input" style="color:rgba(232,213,176,0.75)">
+                Your spoiler thoughts
+              </label>
+              <textarea id="spoiler-input" class="form-control" rows="3"
+                placeholder="Share thoughts that would spoil the plot…"></textarea>
+            </div>
+            <button id="spoiler-save-btn" class="btn btn--accent btn--sm">Save spoiler thoughts</button>
+          </div>
+
+          <div class="spoiler-responses" id="spoiler-responses" style="margin-top:1rem"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer style="padding:1.5rem;text-align:center;font-size:0.8rem;color:var(--clr-text-muted);border-top:1px solid var(--clr-border)">
+  Page Turners Book Club · Data stored locally in your browser
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/book.js"></script>
+<script>
+// Wire up recommendation poll after book.js has rendered
+document.addEventListener('DOMContentLoaded', () => {
+  // The poll is filled by book.js after App.init()
+  // This is a fallback observer
+  const observer = new MutationObserver(() => {
+    const params = new URLSearchParams(location.search);
+    const bookId = params.get('id');
+    if (!bookId || !App.state.ready) return;
+
+    const pct = App.recommendPercent(bookId);
+    const ratings = App.getRatingsForBook(bookId);
+    const recs = ratings.filter(r => r.wouldRecommend).length;
+
+    if (pct !== null) {
+      document.getElementById('rec-poll-fill').style.width = pct + '%';
+      document.getElementById('rec-poll-pct').textContent = `${pct}% would recommend`;
+      document.getElementById('rec-poll-count').textContent =
+        `${recs} of ${ratings.length} respondents`;
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.getElementById('main-content'), { childList: true, subtree: true });
+
+  // Also try immediately in case data already loaded
+  setTimeout(() => {
+    const params = new URLSearchParams(location.search);
+    const bookId = params.get('id');
+    if (!bookId || !App.state.ready) return;
+    const pct = App.recommendPercent(bookId);
+    const ratings = App.getRatingsForBook(bookId);
+    if (pct !== null) {
+      document.getElementById('rec-poll-fill').style.width = pct + '%';
+      document.getElementById('rec-poll-pct').textContent = `${pct}% would recommend`;
+      document.getElementById('rec-poll-count').textContent =
+        `${ratings.filter(r => r.wouldRecommend).length} of ${ratings.length} respondents`;
+    }
+  }, 500);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Past Books — Page Turners</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+    <a href="dashboard.html" class="site-logo" aria-label="Page Turners home">
+      <span class="site-logo__icon" aria-hidden="true">📚</span>
+      Page Turners
+    </a>
+    <nav class="site-nav" role="navigation" aria-label="Main navigation">
+      <a href="dashboard.html" class="site-nav__link">Dashboard</a>
+      <a href="archive.html"   class="site-nav__link active">Archive</a>
+      <div class="nav-divider" aria-hidden="true"></div>
+      <a href="#" id="admin-nav-link" class="site-nav__link hidden">⚙ Admin</a>
+      <div class="nav-user">
+        <span>👤</span>
+        <span class="nav-user__name" id="nav-member-name">…</span>
+        <button onclick="App.switchMember()" class="btn btn--ghost btn--sm" style="font-size:0.78rem;padding:0.25rem 0.6rem" title="Switch member">Switch</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Page Hero ──────────────────────────────────────────── -->
+<div class="page-hero" role="region" aria-label="Archive header">
+  <div class="page-hero__inner">
+    <div class="page-hero__eyebrow">Page Turners</div>
+    <h1 class="page-hero__title">📖 Books We've Read</h1>
+    <p class="page-hero__sub">Every month's selections, ratings, and discussions.</p>
+  </div>
+</div>
+
+<!-- ── Stats Bar ──────────────────────────────────────────── -->
+<div class="stats-bar" role="region" aria-label="Archive stats">
+  <div class="stats-bar__inner">
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-past-sessions">—</span>
+      <span class="stat-item__label">Months</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-past-books">—</span>
+      <span class="stat-item__label">Books Read</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-past-ratings">—</span>
+      <span class="stat-item__label">Total Ratings</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Content ───────────────────────────────────────── -->
+<main id="main-content" role="main">
+  <section class="section" aria-label="Past books">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title">Past Sessions</h2>
+        <a href="dashboard.html" class="btn btn--ghost btn--sm">← Current Read</a>
+      </div>
+      <div class="archive-grid" id="archive-grid">
+        <div class="loading-state" style="grid-column:1/-1">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <p>Loading archive…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer style="padding:1.5rem;text-align:center;font-size:0.8rem;color:var(--clr-text-muted);border-top:1px solid var(--clr-border)">
+  Page Turners Book Club · Data stored locally in your browser
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/archive.js"></script>
+</body>
+</html>

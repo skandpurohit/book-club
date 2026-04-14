@@ -1,0 +1,4 @@
+{
+  "_note": "Seed ratings maintained by admin. New ratings are stored in browser localStorage. Export and merge regularly (see README).",
+  "ratings": []
+}

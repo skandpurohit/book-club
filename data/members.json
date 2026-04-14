@@ -1,0 +1,29 @@
+{
+  "_note": "Admin maintains this file. New members who self-register via the app are stored in browser localStorage only. Export and merge regularly (see README).",
+  "members": [
+    {
+      "id": "member-001",
+      "name": "Skand Purohit",
+      "joinedAt": "2026-01-01T10:00:00Z",
+      "isAdmin": true
+    },
+    {
+      "id": "member-002",
+      "name": "Nereus Lobo",
+      "joinedAt": "2026-01-01T10:00:00Z",
+      "isAdmin": false
+    },
+    {
+      "id": "member-003",
+      "name": "Dibjot Singh",
+      "joinedAt": "2026-01-01T10:00:00Z",
+      "isAdmin": false
+    },
+    {
+      "id": "member-004",
+      "name": "Vineet Parsai",
+      "joinedAt": "2026-01-01T10:00:00Z",
+      "isAdmin": false
+    }
+  ]
+}

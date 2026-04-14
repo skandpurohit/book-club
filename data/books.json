@@ -1,0 +1,132 @@
+{
+  "sessions": [
+    {
+      "id": "2026-01",
+      "label": "January 2026",
+      "isCurrent": false,
+      "books": [
+        {
+          "id": "book-001",
+          "title": "I Hate the Ivy League: Riffs and Rants on Elite Education",
+          "author": "Malcolm Gladwell",
+          "genre": "Non-Fiction / Essays",
+          "pages": 256,
+          "isbn": "978-0316576406",
+          "coverColor": "#8B0000",
+          "coverTextColor": "#FFFFFF",
+          "selectedBy": "Nereus Lobo",
+          "selectedById": "member-002",
+          "description": "Malcolm Gladwell turns his signature contrarian lens on elite American higher education — questioning whether Ivy League schools actually produce better outcomes than their reputations suggest, or whether prestige has become a self-perpetuating myth that serves the powerful more than the talented.",
+          "discussionPrompts": [
+            "Did Gladwell's argument change how you think about elite university prestige? Were you convinced?",
+            "Is the Ivy League admissions process a meritocracy, or something else entirely?",
+            "Gladwell argues that many high-achieving students would be better off at non-elite schools. Do you agree?",
+            "What role does social capital — who you know — play in the value of an elite degree?",
+            "How does this book apply to the education systems outside the US, including in our own backgrounds?",
+            "Is Gladwell being provocative for the sake of it, or does the data genuinely support his claims?"
+          ],
+          "spoilerPrompts": [
+            "Which specific argument or data point in the book surprised you most?",
+            "Did the book change any decisions you'd make for your own children or family regarding education?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2026-02",
+      "label": "February 2026",
+      "isCurrent": false,
+      "books": [
+        {
+          "id": "book-002",
+          "title": "The Correspondent",
+          "author": "Virginia Evans",
+          "genre": "Novel",
+          "pages": 320,
+          "isbn": "",
+          "coverColor": "#1a3a5c",
+          "coverTextColor": "#FFFFFF",
+          "selectedBy": "Dibjot Singh",
+          "selectedById": "member-003",
+          "description": "A novel selected by Dibjot Singh for the February 2026 session.",
+          "discussionPrompts": [
+            "What drew you into the story in the opening chapters?",
+            "How does the author develop the central character's voice and perspective?",
+            "What themes did you notice running through the novel?",
+            "Which relationship in the book felt most authentic or complicated?",
+            "How did the ending land for you — did it feel earned?",
+            "Would you recommend this to someone outside the club? Why or why not?"
+          ],
+          "spoilerPrompts": [
+            "What was the moment that changed everything for you as a reader?",
+            "Looking back, what did the title mean to you after finishing?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2026-03",
+      "label": "March 2026",
+      "isCurrent": false,
+      "books": [
+        {
+          "id": "book-003",
+          "title": "21 Lessons for the 21st Century",
+          "author": "Yuval Noah Harari",
+          "genre": "Non-Fiction / Philosophy",
+          "pages": 372,
+          "isbn": "978-0525512172",
+          "coverColor": "#2C3E50",
+          "coverTextColor": "#FFFFFF",
+          "selectedBy": "Vineet Parsai",
+          "selectedById": "member-004",
+          "description": "Yuval Noah Harari, author of Sapiens and Homo Deus, focuses on the present — addressing the most urgent questions of our time: how do we navigate a world reshaped by technology, nationalism, religion, and misinformation? A sweeping, thought-provoking guide to the forces defining the 21st century.",
+          "discussionPrompts": [
+            "Which of Harari's 21 lessons hit closest to home for you personally?",
+            "Do you think AI and automation will ultimately improve human lives, or will the disruption outweigh the benefit?",
+            "Harari is quite critical of nationalism and religion as coping frameworks. Did you find that fair?",
+            "How do you personally deal with information overload and media manipulation in your daily life?",
+            "The book argues that the most important skill for the future is the ability to reinvent yourself. Do you agree?",
+            "Is Harari too pessimistic, appropriately alarmed, or not alarmed enough?"
+          ],
+          "spoilerPrompts": [
+            "The final lesson is about meditation and self-knowledge. Did that ending surprise you given the book's political sweep?",
+            "Which prediction in the book do you think is most likely to age badly — and which most likely to prove true?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2026-04",
+      "label": "April 2026",
+      "isCurrent": true,
+      "books": [
+        {
+          "id": "book-004",
+          "title": "Murder at the Patel Motel",
+          "author": "Maulik Pancholy",
+          "genre": "Mystery / Fiction",
+          "pages": 288,
+          "isbn": "978-1665912884",
+          "coverColor": "#5C4033",
+          "coverTextColor": "#FFFFFF",
+          "selectedBy": "Skand Purohit",
+          "selectedById": "member-001",
+          "description": "When thirteen-year-old Ansh Patel's family moves from New York City to run a motel in small-town Georgia, he expects a boring summer. Then a guest turns up dead, and Ansh finds himself in the middle of a mystery that forces him to confront questions of identity, belonging, and what home really means. A witty, heartfelt whodunit.",
+          "discussionPrompts": [
+            "How does Pancholy use the motel setting to explore themes of belonging and the immigrant experience?",
+            "Ansh is caught between two worlds — how does that tension play out through the story?",
+            "What did the book say about small-town America and how outsiders are perceived?",
+            "How does the mystery plot serve (or distract from) the deeper emotional story?",
+            "Were there moments of humour that also carried a sharper point?",
+            "What does 'home' mean to Ansh by the end — and did that resonate with you?"
+          ],
+          "spoilerPrompts": [
+            "Who did you suspect, and when did you figure out the real answer?",
+            "Did the resolution of the mystery feel satisfying alongside the emotional arc?"
+          ]
+        }
+      ]
+    }
+  ]
+}

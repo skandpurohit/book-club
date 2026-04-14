@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Turners Book Club</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-page { background: linear-gradient(160deg, #3d1a00 0%, #7B3F00 55%, #b5600a 100%); }
+    .code-input-wrap { position: relative; }
+    .code-input-wrap::after {
+      content: '🔑';
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<main class="auth-page" role="main">
+  <div class="auth-card">
+    <span class="auth-logo__icon" aria-hidden="true">📚</span>
+    <h1 class="auth-logo" id="app-name">Page Turners</h1>
+    <p class="auth-subtitle" id="app-subtitle">Our Monthly Book Club</p>
+
+    <form id="access-form" novalidate>
+      <div class="form-group">
+        <label for="code-input">Member Access Code</label>
+        <div class="code-input-wrap">
+          <input
+            type="text"
+            id="code-input"
+            class="form-control form-control--lg"
+            placeholder="XXXXXX"
+            maxlength="10"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            required
+            aria-describedby="code-hint code-error">
+        </div>
+        <p class="form-hint" id="code-hint">Ask the group organiser for the code.</p>
+        <p class="form-error" id="code-error" role="alert"></p>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--lg btn--full" id="submit-btn">
+        Enter
+      </button>
+    </form>
+
+    <hr class="auth-divider">
+    <p style="font-size:0.8rem;color:var(--clr-text-muted)">
+      Already a member? Your reading history is stored in your browser.
+    </p>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  // Load config to get app name; graceful fail
+  try {
+    const config = await fetch('data/config.json').then(r => r.json());
+    if (config.appName)     document.getElementById('app-name').textContent    = config.appName;
+    if (config.appSubtitle) document.getElementById('app-subtitle').textContent = config.appSubtitle;
+    document.title = config.appName || 'Page Turners';
+  } catch { /* non-critical */ }
+
+  // If already granted + session, skip straight to dashboard
+  if (localStorage.getItem('bookclub_access_granted') === 'true') {
+    const s = sessionStorage.getItem('bookclub_session');
+    if (s) { window.location.href = 'dashboard.html'; return; }
+    window.location.href = 'register.html';
+    return;
+  }
+
+  await App.init();
+
+  const form    = document.getElementById('access-form');
+  const input   = document.getElementById('code-input');
+  const errEl   = document.getElementById('code-error');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Auto-uppercase
+  input.addEventListener('input', () => { input.value = input.value.toUpperCase(); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errEl.classList.remove('visible');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Checking…';
+
+    const code = input.value.trim();
+    if (!code) {
+      showError('Please enter the access code.');
+      return;
+    }
+
+    const ok = await App.verifyAccessCode(code);
+    if (ok) {
+      localStorage.setItem('bookclub_access_granted', 'true');
+      window.location.href = 'register.html';
+    } else {
+      showError('That code isn\'t right. Check with your group organiser.');
+      input.select();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enter';
+    }
+  });
+
+  function showError(msg) {
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Enter';
+  }
+})();
+</script>
+</body>
+</html>

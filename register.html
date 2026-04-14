@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who are you? — Page Turners</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<main class="auth-page" role="main">
+  <div class="auth-card" style="max-width:480px">
+    <a href="index.html" class="back-link" style="position:absolute;top:1rem;left:1rem;color:rgba(255,255,255,0.7)">← Back</a>
+
+    <span class="auth-logo__icon" aria-hidden="true">👋</span>
+    <h1 class="auth-logo">Who are you?</h1>
+    <p class="auth-subtitle">Choose your name or register as a new member.</p>
+
+    <!-- Tab group -->
+    <div class="tab-group" id="tab-group">
+      <button class="tab-btn active" data-tab="existing">I'm a member</button>
+      <button class="tab-btn" data-tab="new">New member</button>
+    </div>
+
+    <!-- Existing member panel -->
+    <div class="tab-panel active" id="panel-existing">
+      <div class="form-group">
+        <label for="member-search">Search your name</label>
+        <input type="text" id="member-search" class="form-control" placeholder="Start typing…" autocomplete="off">
+      </div>
+      <div id="member-list" class="member-list" role="listbox" aria-label="Members"></div>
+      <p class="form-hint mt-1" id="list-hint">Can't find your name? Switch to "New member".</p>
+      <button id="continue-btn" class="btn btn--primary btn--lg btn--full mt-3" disabled>
+        Continue as <span id="continue-name">…</span>
+      </button>
+    </div>
+
+    <!-- New member panel -->
+    <div class="tab-panel" id="panel-new">
+      <form id="new-member-form" novalidate>
+        <div class="form-group">
+          <label for="new-name">Your name</label>
+          <input type="text" id="new-name" class="form-control" placeholder="e.g. Jane Smith"
+            autocomplete="name" maxlength="60" required>
+          <p class="form-hint">Use the same name each time — it's how the app identifies you.</p>
+          <p class="form-error" id="new-name-error" role="alert"></p>
+        </div>
+        <button type="submit" class="btn btn--primary btn--lg btn--full">Join the club →</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  App.checkAccessOnly(true); // redirect to index if no access code
+
+  // If already in session, go to dashboard
+  const sess = App.getSession();
+  if (sess && sess.memberId) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  try {
+    await App.init();
+  } catch {
+    App.showToast('Could not load member data. Try refreshing.', 'error');
+    return;
+  }
+
+  // ── Tabs ────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Existing member panel ────────────────────────────────
+  const members     = App.getAllMembers();
+  const listEl      = document.getElementById('member-list');
+  const searchEl    = document.getElementById('member-search');
+  const continueBtn = document.getElementById('continue-btn');
+  const continueName = document.getElementById('continue-name');
+  let selectedMember = null;
+
+  function renderList(filter = '') {
+    listEl.innerHTML = '';
+    const filtered = filter
+      ? members.filter(m => m.name.toLowerCase().includes(filter.toLowerCase()))
+      : members;
+
+    if (!filtered.length) {
+      listEl.innerHTML = `<div style="padding:0.75rem;font-size:0.85rem;color:var(--clr-text-muted)">No members found. Try "New member" to register.</div>`;
+      return;
+    }
+
+    filtered.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'member-list__item';
+      item.setAttribute('role', 'option');
+      item.dataset.id = m.id;
+      item.innerHTML = `
+        <div class="member-avatar member-avatar--sm"
+          style="background:hsl(${nameHue(m.name)},45%,38%)">${initials(m.name)}</div>
+        <span class="member-list__name">${esc(m.name)}</span>
+        ${m.isAdmin ? '<span class="badge badge--accent" style="font-size:0.65rem">Admin</span>' : ''}`;
+      item.addEventListener('click', () => {
+        listEl.querySelectorAll('.member-list__item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedMember = m;
+        continueName.textContent = m.name;
+        continueBtn.disabled = false;
+      });
+      listEl.appendChild(item);
+    });
+  }
+
+  renderList();
+  searchEl.addEventListener('input', () => {
+    selectedMember = null;
+    continueBtn.disabled = true;
+    continueName.textContent = '…';
+    renderList(searchEl.value);
+  });
+
+  continueBtn.addEventListener('click', () => {
+    if (!selectedMember) return;
+    App.setSession({ memberId: selectedMember.id, memberName: selectedMember.name });
+    window.location.href = 'dashboard.html';
+  });
+
+  // ── New member form ──────────────────────────────────────
+  document.getElementById('new-member-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name    = document.getElementById('new-name').value.trim();
+    const errEl   = document.getElementById('new-name-error');
+    errEl.classList.remove('visible');
+
+    if (!name) {
+      errEl.textContent = 'Please enter your name.';
+      errEl.classList.add('visible');
+      return;
+    }
+    if (name.length < 2) {
+      errEl.textContent = 'Name must be at least 2 characters.';
+      errEl.classList.add('visible');
+      return;
+    }
+
+    // Check if name already exists (case-insensitive)
+    const existing = App.findMemberByName(name);
+    if (existing) {
+      // Just log them in
+      App.setSession({ memberId: existing.id, memberName: existing.name });
+      App.showToast(`Welcome back, ${existing.name}!`, 'success');
+      setTimeout(() => window.location.href = 'dashboard.html', 700);
+      return;
+    }
+
+    const member = App.registerMember(name);
+    App.setSession({ memberId: member.id, memberName: member.name });
+    App.showToast(`Welcome, ${member.name}! Great to have you.`, 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 700);
+  });
+
+  // ── Helpers ──────────────────────────────────────────────
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function initials(name) {
+    return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+  function nameHue(name) {
+    return [...name].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+  }
+})();
+</script>
+</body>
+</html>

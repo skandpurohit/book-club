@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Page Turners</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+    <a href="dashboard.html" class="site-logo" aria-label="Page Turners home">
+      <span class="site-logo__icon" aria-hidden="true">📚</span>
+      Page Turners
+    </a>
+    <nav class="site-nav" role="navigation" aria-label="Main navigation">
+      <a href="dashboard.html" class="site-nav__link active">Dashboard</a>
+      <a href="archive.html"   class="site-nav__link">Archive</a>
+      <div class="nav-divider" aria-hidden="true"></div>
+      <a href="archive.html" id="admin-nav-link" class="site-nav__link hidden" title="Admin panel">⚙ Admin</a>
+      <div class="nav-user">
+        <span>👤</span>
+        <span class="nav-user__name" id="nav-member-name">…</span>
+        <button onclick="App.switchMember()" class="btn btn--ghost btn--sm" style="font-size:0.78rem;padding:0.25rem 0.6rem" title="Switch member">Switch</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Hero ───────────────────────────────────────────────── -->
+<div class="page-hero" role="region" aria-label="Current reading">
+  <div class="page-hero__inner">
+    <div class="page-hero__eyebrow" id="hero-count">This Month's Read</div>
+    <h1 class="page-hero__title" id="hero-label">Loading…</h1>
+    <p class="page-hero__sub">Rate the book, share your thoughts, and read what others think.</p>
+  </div>
+</div>
+
+<!-- ── Stats Bar ──────────────────────────────────────────── -->
+<div class="stats-bar" role="region" aria-label="Club stats">
+  <div class="stats-bar__inner">
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-members">—</span>
+      <span class="stat-item__label">Members</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-ratings">—</span>
+      <span class="stat-item__label">Ratings</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-comments">—</span>
+      <span class="stat-item__label">Responses</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="stat-avg">—</span>
+      <span class="stat-item__label" id="stat-avg-label">Avg Rating</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Content ───────────────────────────────────────── -->
+<main id="main-content" role="main">
+
+  <!-- Loading state -->
+  <div class="section" id="loading-state">
+    <div class="loading-state">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>Loading your book club…</p>
+    </div>
+  </div>
+
+  <!-- Books section (populated by JS) -->
+  <section class="section" id="books-section" aria-label="Current books">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title">
+          Current Reading
+          <span class="section__title-tag">Active</span>
+        </h2>
+      </div>
+      <div class="books-grid" id="books-grid"></div>
+    </div>
+  </section>
+
+  <!-- Admin Panel (hidden unless admin) -->
+  <section class="section hidden" id="admin-section" aria-label="Admin panel">
+    <div class="section__inner">
+      <div class="admin-panel">
+        <div class="admin-panel__title">⚙ Admin Tools</div>
+        <p style="font-size:0.85rem;color:var(--clr-text-muted);margin-bottom:0.75rem">
+          Export all locally stored data (new members, ratings, comments) so you can commit it back to the repository.
+        </p>
+        <div class="admin-panel__actions">
+          <button class="btn btn--accent btn--sm" onclick="exportData()">
+            ⬇ Export Local Data as JSON
+          </button>
+          <a href="archive.html" class="btn btn--secondary btn--sm">View Archive</a>
+        </div>
+        <p style="font-size:0.75rem;color:var(--clr-text-muted);margin-top:0.75rem">
+          After downloading, open the JSON, copy the arrays into <code>data/members.json</code>,
+          <code>data/ratings.json</code>, and <code>data/comments.json</code>, then commit and push to GitHub.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Responses -->
+  <section class="section section--alt" id="responses-section" aria-label="Recent member responses">
+    <div class="section__inner">
+      <div class="section__header">
+        <h2 class="section__title">Recent Member Responses</h2>
+        <a href="#" class="btn btn--ghost btn--sm" id="view-all-link">View all →</a>
+      </div>
+      <div class="responses-grid" id="recent-responses"></div>
+      <div class="empty-state hidden" aria-live="polite">
+        <span class="empty-state__icon">🌱</span>
+        <p>No responses yet — be the first to share your thoughts!</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer style="padding:1.5rem;text-align:center;font-size:0.8rem;color:var(--clr-text-muted);border-top:1px solid var(--clr-border)">
+  Page Turners Book Club · Data stored locally in your browser
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+// Remove loading state after JS runs
+document.getElementById('loading-state').style.display = 'none';
+</script>
+</body>
+</html>

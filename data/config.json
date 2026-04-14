@@ -1,0 +1,10 @@
+{
+  "_note": "accessCode is stored in plaintext here — this is a known limitation of static GitHub Pages hosting. See README for upgrade options.",
+  "appName": "Page Turners",
+  "appSubtitle": "Our Monthly Book Club",
+  "accessCode": "BOOKS6",
+  "allowEditRatings": true,
+  "allowEditComments": true,
+  "adminMemberId": "member-001",
+  "discussionCloseAfterDays": 45
+}
