@@ -473,9 +473,14 @@ const App = (() => {
     const attr = interactive ? ` data-book="${bookId}"` : '';
     let html = `<span class="${cls}"${attr} aria-label="${count} out of ${max} stars">`;
     for (let i = 1; i <= max; i++) {
-      // role="button" is required for iOS Safari to fire touch/click events on <span> elements
-      const roleAttr = interactive ? ' role="button" tabindex="0"' : '';
-      html += `<span class="star${i <= count ? ' star--filled' : ''}" data-value="${i}"${roleAttr}>★</span>`;
+      const filled = i <= count ? ' star--filled' : '';
+      if (interactive) {
+        // Use <button> for interactive stars — guaranteed to work on iOS Safari.
+        // Plain <span> elements are not reliably tappable in mobile Safari.
+        html += `<button type="button" class="star${filled}" data-value="${i}" aria-label="${i} star">★</button>`;
+      } else {
+        html += `<span class="star${filled}" data-value="${i}">★</span>`;
+      }
     }
     return html + '</span>';
   }

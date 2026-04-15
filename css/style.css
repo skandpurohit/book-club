@@ -542,17 +542,27 @@ textarea.form-control {
 .stars--interactive {
   touch-action: manipulation; /* removes 300ms tap delay on mobile */
 }
-.stars--interactive .star {
-  cursor: pointer;
-  position: relative;
+/* Reset <button> element so interactive stars look identical to display stars */
+button.star {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
+  /* Minimum 44×44px tap target for mobile accessibility */
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-/* Expand the tap target on touch devices using a pseudo-element.
-   This avoids the overlap caused by negative margins. */
-.stars--interactive .star::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
+button.star:focus-visible {
+  outline: 2px solid var(--clr-accent);
+  border-radius: var(--radius-xs);
 }
+.stars--interactive .star { cursor: pointer; }
 .stars--interactive .star:hover,
 .stars--interactive .star--hover { color: var(--clr-star); transform: scale(1.12); }
 .stars--sm .star { font-size: 1rem; }
