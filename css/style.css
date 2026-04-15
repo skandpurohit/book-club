@@ -544,9 +544,14 @@ textarea.form-control {
 }
 .stars--interactive .star {
   cursor: pointer;
-  /* Expand touch target without changing visual size */
-  padding: 0.3rem;
-  margin: -0.3rem;
+  position: relative;
+}
+/* Expand the tap target on touch devices using a pseudo-element.
+   This avoids the overlap caused by negative margins. */
+.stars--interactive .star::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .stars--interactive .star:hover,
 .stars--interactive .star--hover { color: var(--clr-star); transform: scale(1.12); }
