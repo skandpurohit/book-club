@@ -64,10 +64,13 @@
   // ── Recent Responses ───────────────────────────────────
   renderRecentResponses(currentSession);
 
-  // ── Admin Panel ────────────────────────────────────────
+  // ── Suggest Next Month's Book (all members) ────────────
+  document.getElementById('suggest-book-section').classList.remove('hidden');
+  initAdminForm();
+
+  // ── Admin Panel (export tools only) ────────────────────
   if (member && member.isAdmin) {
     document.getElementById('admin-section').classList.remove('hidden');
-    initAdminForm();
   }
 })();
 

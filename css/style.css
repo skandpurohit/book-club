@@ -539,11 +539,24 @@ textarea.form-control {
   user-select: none;
 }
 .star--filled { color: var(--clr-star); }
-.stars--interactive .star { cursor: pointer; }
+.stars--interactive {
+  touch-action: manipulation; /* removes 300ms tap delay on mobile */
+}
+.stars--interactive .star {
+  cursor: pointer;
+  /* Expand touch target without changing visual size */
+  padding: 0.3rem;
+  margin: -0.3rem;
+}
 .stars--interactive .star:hover,
-.stars--interactive .star--hover { color: var(--clr-star); transform: scale(1.15); }
+.stars--interactive .star--hover { color: var(--clr-star); transform: scale(1.12); }
 .stars--sm .star { font-size: 1rem; }
 .stars--lg .star { font-size: 1.6rem; }
+/* On touch devices avoid the hover colour persisting between taps */
+@media (hover: none) {
+  .stars--interactive .star:hover { color: inherit; transform: none; }
+  .stars--interactive .star--filled:hover { color: var(--clr-star); }
+}
 .star-label {
   font-size: 0.82rem;
   color: var(--clr-text-muted);
@@ -1215,6 +1228,10 @@ textarea.form-control {
   .site-header__inner { flex-wrap: wrap; gap: 0.5rem; }
   .site-nav { flex-wrap: wrap; }
   .books-grid { grid-template-columns: 1fr; }
+  /* Ensure tap targets meet 44px minimum on mobile */
+  .btn { min-height: 44px; }
+  .btn--sm { min-height: 36px; }
+  .rating-save-btn { width: 100%; }
   .upcoming-book-card { flex-direction: column; }
   .upcoming-book-card__cover { width: 100%; min-height: 130px; }
   .upcoming-book-card__body { padding: 1rem; }
@@ -1225,8 +1242,35 @@ textarea.form-control {
   #toast-container { left: 1rem; right: 1rem; }
   .modal { border-radius: var(--radius-md); }
 }
-@media (max-width: 440px) {
-  .site-nav { display: none; }
-  .site-header__inner { justify-content: space-between; }
-  .mobile-menu-btn { display: flex; }
+@media (max-width: 480px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem 0;
+    gap: 0;
+  }
+  .site-logo { flex: 1; padding-bottom: 0.5rem; }
+  .nav-user  { padding-bottom: 0.5rem; }
+  .nav-user__name {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Nav links drop to a full-width scrollable strip below logo row */
+  .site-nav {
+    display: flex !important;
+    order: 10;
+    width: calc(100% + 2rem);
+    margin: 0 -1rem;
+    padding: 0.3rem 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.15rem;
+    flex-wrap: nowrap;
+  }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .nav-divider { display: none; }
+  .site-nav__link { white-space: nowrap; font-size: 0.82rem; padding: 0.35rem 0.6rem; }
 }

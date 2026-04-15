@@ -98,16 +98,15 @@
     </div>
   </section>
 
-  <!-- Admin Panel (hidden unless admin) -->
-  <section class="section hidden" id="admin-section" aria-label="Admin panel">
+  <!-- Suggest Next Month's Book (all members) -->
+  <section class="section hidden" id="suggest-book-section" aria-label="Suggest next month's book">
     <div class="section__inner">
-
-      <!-- Add Next Month's Book -->
+      <div class="section__header">
+        <h2 class="section__title">Suggest Next Month's Book</h2>
+      </div>
       <div class="admin-panel" id="admin-add-book-panel">
-        <div class="admin-panel__title">📅 Add Next Month's Book</div>
         <p style="font-size:0.85rem;color:var(--clr-text-muted);margin-bottom:1.25rem">
-          Fill in the details below. The book will appear in the "Coming Next Month" section for all members
-          once you export and commit the updated <code>books.json</code>.
+          Nominate a book for next month. Your suggestion is saved immediately and visible to everyone.
         </p>
         <form id="add-book-form" novalidate>
           <div class="form-row">
@@ -166,8 +165,13 @@
         </form>
       </div>
 
-      <!-- Export Tools -->
-      <div class="admin-panel" style="margin-top:1rem">
+    </div>
+  </section>
+
+  <!-- Admin Panel (hidden unless admin) — export tools only -->
+  <section class="section hidden" id="admin-section" aria-label="Admin panel">
+    <div class="section__inner">
+      <div class="admin-panel">
         <div class="admin-panel__title">⚙ Export & Commit</div>
         <p style="font-size:0.85rem;color:var(--clr-text-muted);margin-bottom:0.75rem">
           Download updated data files and commit them to GitHub to share with all members.

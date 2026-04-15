@@ -486,15 +486,28 @@ const App = (() => {
     const stars = Array.from(container.querySelectorAll('.star'));
     let current = 0;
 
+    function selectValue(v) {
+      current = v;
+      _paintStars(stars, current);
+      if (onChange) onChange(current);
+    }
+
     stars.forEach(star => {
       star.addEventListener('mouseenter', () => {
         const v = parseInt(star.dataset.value);
         stars.forEach((s, i) => s.classList.toggle('star--hover', i < v));
       });
+
+      // touchstart gives instant feedback on mobile without waiting for click
+      star.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // prevents ghost mouse events firing after touch
+        const v = parseInt(star.dataset.value);
+        selectValue(v);
+      }, { passive: false });
+
       star.addEventListener('click', () => {
-        current = parseInt(star.dataset.value);
-        _paintStars(stars, current);
-        if (onChange) onChange(current);
+        const v = parseInt(star.dataset.value);
+        selectValue(v);
       });
     });
 
