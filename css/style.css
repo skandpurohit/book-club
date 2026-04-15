@@ -542,21 +542,20 @@ textarea.form-control {
 .stars--interactive {
   touch-action: manipulation; /* removes 300ms tap delay on mobile */
 }
-/* Reset <button> element so interactive stars look identical to display stars */
+/* Reset <button> so interactive stars look identical to display stars.
+   -webkit-appearance:none is required — without it iOS Safari applies its
+   own system button colour, making all stars appear selected.
+   Do NOT set color here; let .star and .star--filled control it. */
 button.star {
+  -webkit-appearance: none;
+  appearance: none;
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.6rem 0.25rem; /* gives ~44px tap height without changing visual size */
   margin: 0;
   font: inherit;
   line-height: 1;
-  color: inherit;
-  /* Minimum 44×44px tap target for mobile accessibility */
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* color intentionally omitted — .star sets empty colour, .star--filled sets filled */
 }
 button.star:focus-visible {
   outline: 2px solid var(--clr-accent);
