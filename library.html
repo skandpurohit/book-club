@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Past Books — Page Turners</title>
+  <title>Library — Page Turners</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -18,8 +18,8 @@
     </a>
     <nav class="site-nav" role="navigation" aria-label="Main navigation">
       <a href="dashboard.html" class="site-nav__link">Dashboard</a>
-      <a href="library.html"   class="site-nav__link">Library</a>
-      <a href="archive.html"   class="site-nav__link active">Archive</a>
+      <a href="library.html"   class="site-nav__link active">Library</a>
+      <a href="archive.html"   class="site-nav__link">Archive</a>
       <div class="nav-divider" aria-hidden="true"></div>
       <a href="#" id="admin-nav-link" class="site-nav__link hidden">⚙ Admin</a>
       <div class="nav-user">
@@ -32,58 +32,69 @@
 </header>
 
 <!-- ── Page Hero ──────────────────────────────────────────── -->
-<div class="page-hero" role="region" aria-label="Archive header">
+<div class="page-hero" role="region" aria-label="Library header">
   <div class="page-hero__inner">
     <div class="page-hero__eyebrow">Page Turners</div>
-    <h1 class="page-hero__title">📖 Books We've Read</h1>
-    <p class="page-hero__sub">Every month's selections, ratings, and discussions.</p>
+    <h1 class="page-hero__title">📚 Our Library</h1>
+    <p class="page-hero__sub">Every book we've read — ratings, metadata, and full discussions.</p>
   </div>
 </div>
 
 <!-- ── Stats Bar ──────────────────────────────────────────── -->
-<div class="stats-bar" role="region" aria-label="Archive stats">
+<div class="stats-bar" role="region" aria-label="Library stats">
   <div class="stats-bar__inner">
     <div class="stat-item">
-      <span class="stat-item__value" id="stat-past-sessions">—</span>
-      <span class="stat-item__label">Months</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-item__value" id="stat-past-books">—</span>
+      <span class="stat-item__value" id="lib-stat-books">—</span>
       <span class="stat-item__label">Books Read</span>
     </div>
     <div class="stat-item">
-      <span class="stat-item__value" id="stat-past-ratings">—</span>
+      <span class="stat-item__value" id="lib-stat-avg">—</span>
+      <span class="stat-item__label">Club Avg Rating</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="lib-stat-ratings">—</span>
       <span class="stat-item__label">Total Ratings</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-item__value" id="lib-stat-pages">—</span>
+      <span class="stat-item__label">Pages Read</span>
     </div>
   </div>
 </div>
 
 <!-- ── Main Content ───────────────────────────────────────── -->
 <main id="main-content" role="main">
-  <section class="section" aria-label="Past books">
+
+  <section class="section" aria-label="All books">
     <div class="section__inner">
       <div class="section__header">
-        <h2 class="section__title">Past Sessions</h2>
-        <a href="dashboard.html" class="btn btn--ghost btn--sm">← Current Read</a>
+        <h2 class="section__title">All Books</h2>
+        <div id="lib-sort-controls" style="display:flex;gap:0.5rem;align-items:center">
+          <span style="font-size:0.8rem;color:var(--clr-text-muted)">Sort:</span>
+          <button class="lib-sort-btn active" data-sort="date">Date</button>
+          <button class="lib-sort-btn" data-sort="rating">Rating</button>
+          <button class="lib-sort-btn" data-sort="title">Title</button>
+        </div>
       </div>
-      <div class="archive-grid" id="archive-grid">
+      <div class="lib-grid" id="lib-grid">
         <div class="loading-state" style="grid-column:1/-1">
           <div class="loading-spinner" aria-hidden="true"></div>
-          <p>Loading archive…</p>
+          <p>Loading library…</p>
         </div>
       </div>
     </div>
   </section>
+
 </main>
 
 <footer style="padding:1.5rem;text-align:center;font-size:0.8rem;color:var(--clr-text-muted);border-top:1px solid var(--clr-border)">
-  Page Turners Book Club · Data stored locally in your browser
+  Page Turners Book Club
 </footer>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/app.js"></script>
-<script src="js/archive.js"></script>
+<script src="js/library.js"></script>
 </body>
 </html>

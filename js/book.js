@@ -51,6 +51,9 @@
   // ── Discussion Form ──────────────────────────────────────
   renderDiscussionForm(book, session);
 
+  // ── Member Ratings ────────────────────────────────────────
+  renderMemberRatings(book);
+
   // ── Member Responses ─────────────────────────────────────
   renderResponses(book);
 
@@ -257,6 +260,51 @@ function setValue(id, val) {
   if (!el || val == null) return;
   if (el.tagName === 'SELECT') el.value = val === true ? 'yes' : val === false ? 'no' : '';
   else el.value = val;
+}
+
+// ── Member Ratings ────────────────────────────────────────────
+function renderMemberRatings(book) {
+  const ratings   = App.getRatingsForBook(book.id);
+  const container = document.getElementById('ratings-container');
+  const countEl   = document.getElementById('ratings-count');
+
+  countEl.textContent = `${ratings.length} Rating${ratings.length !== 1 ? 's' : ''}`;
+
+  if (!ratings.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state__icon">⭐</span>
+        <p>No ratings yet — be the first to rate!</p>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...ratings].sort((a, b) => b.stars - a.stars);
+  const grid = document.createElement('div');
+  grid.className = 'member-ratings-grid';
+
+  sorted.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'member-rating-card';
+    card.innerHTML = `
+      <div class="member-rating-card__who">
+        <div class="member-avatar member-avatar--sm"
+          style="background:hsl(${nameHue(r.memberName)},45%,38%)">${initials(r.memberName)}</div>
+        <span class="member-rating-card__name">${esc(r.memberName)}</span>
+      </div>
+      <div class="member-rating-card__stars">
+        ${App.starsHTML(r.stars)}
+        <span class="member-rating-card__num">${r.stars}/5</span>
+      </div>
+      ${r.wouldRecommend != null
+        ? `<div class="member-rating-card__rec${r.wouldRecommend ? '' : ' member-rating-card__rec--no'}">
+             ${r.wouldRecommend ? '👍 Recommends' : '👎 Not for everyone'}
+           </div>`
+        : ''}`;
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
 }
 
 // ── Member Responses ─────────────────────────────────────────
