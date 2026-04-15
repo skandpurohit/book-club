@@ -467,20 +467,29 @@ const App = (() => {
 
   const STAR_LABELS = ['', 'Didn\'t enjoy it', 'It was okay', 'Liked it', 'Really liked it', 'Loved it'];
 
-  function starsHTML(count, { max = 5, interactive = false, bookId = '', size = '' } = {}) {
+  function starsHTML(count, { max = 5, interactive = false, bookId = '', size = '', id = '' } = {}) {
     const cls = ['stars', interactive && 'stars--interactive', size && `stars--${size}`]
       .filter(Boolean).join(' ');
-    const attr = interactive ? ` data-book="${bookId}"` : '';
-    let html = `<span class="${cls}"${attr} aria-label="${count} out of ${max} stars">`;
-    for (let i = 1; i <= max; i++) {
-      const filled = i <= count ? ' star--filled' : '';
-      if (interactive) {
-        // Use <button> for interactive stars — guaranteed to work on iOS Safari.
-        // Plain <span> elements are not reliably tappable in mobile Safari.
-        html += `<button type="button" class="star${filled}" data-value="${i}" aria-label="${i} star">★</button>`;
-      } else {
-        html += `<span class="star${filled}" data-value="${i}">★</span>`;
+
+    if (!interactive) {
+      // Display-only stars — plain spans, no interaction needed
+      let html = `<span class="${cls}" aria-label="${count} out of ${max} stars">`;
+      for (let i = 1; i <= max; i++) {
+        html += `<span class="star${i <= count ? ' star--filled' : ''}">★</span>`;
       }
+      return html + '</span>';
+    }
+
+    // Interactive stars: hidden radio inputs + <label> elements.
+    // <label> taps trigger the radio natively on every browser including iOS Safari.
+    // The radio 'change' event is the most reliable cross-platform interaction event.
+    const name = `sr-${bookId || 'book'}`;
+    const idAttr = id ? ` id="${id}"` : '';
+    let html = `<span class="${cls}"${idAttr} data-book="${bookId}" role="group" aria-label="Rate this book">`;
+    for (let i = 1; i <= max; i++) {
+      const id = `${name}-${i}`;
+      html += `<input type="radio" class="star-radio" name="${name}" id="${id}" value="${i}">`;
+      html += `<label class="star${i <= count ? ' star--filled' : ''}" for="${id}" aria-label="${i} star${i > 1 ? 's' : ''}">★</label>`;
     }
     return html + '</span>';
   }
@@ -490,48 +499,44 @@ const App = (() => {
    * Returns { getValue, setValue }.
    */
   function initStarWidget(container, onChange) {
-    const stars = Array.from(container.querySelectorAll('.star'));
+    const inputs = Array.from(container.querySelectorAll('.star-radio'));
+    const labels = Array.from(container.querySelectorAll('.star'));
     let current = 0;
 
-    function selectValue(v) {
-      current = v;
-      _paintStars(stars, current);
-      if (onChange) onChange(current);
+    function paintStars(val) {
+      labels.forEach((lbl, i) => {
+        lbl.classList.toggle('star--filled', i < val);
+        lbl.classList.remove('star--hover');
+      });
     }
 
-    stars.forEach(star => {
-      star.addEventListener('mouseenter', () => {
-        const v = parseInt(star.dataset.value);
-        stars.forEach((s, i) => s.classList.toggle('star--hover', i < v));
-      });
-
-      // touchstart gives instant feedback on mobile without waiting for click
-      star.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // prevents ghost mouse events firing after touch
-        const v = parseInt(star.dataset.value);
-        selectValue(v);
-      }, { passive: false });
-
-      star.addEventListener('click', () => {
-        const v = parseInt(star.dataset.value);
-        selectValue(v);
+    // Hover preview on desktop (mouseover on labels)
+    labels.forEach((lbl, idx) => {
+      lbl.addEventListener('mouseenter', () => {
+        labels.forEach((l, i) => l.classList.toggle('star--hover', i <= idx));
       });
     });
-
     container.addEventListener('mouseleave', () => {
-      stars.forEach(s => s.classList.remove('star--hover'));
+      labels.forEach(l => l.classList.remove('star--hover'));
     });
 
-    function _paintStars(list, val) {
-      list.forEach((s, i) => {
-        s.classList.toggle('star--filled', i < val);
-        s.classList.remove('star--hover');
+    // Selection via native radio change — works on all platforms
+    inputs.forEach(input => {
+      input.addEventListener('change', () => {
+        current = parseInt(input.value);
+        paintStars(current);
+        if (onChange) onChange(current);
       });
-    }
+    });
 
     return {
       getValue: () => current,
-      setValue: (val) => { current = val; _paintStars(stars, val); },
+      setValue: (val) => {
+        current = val;
+        const inp = inputs.find(i => parseInt(i.value) === val);
+        if (inp) inp.checked = true;
+        paintStars(val);
+      },
     };
   }
 

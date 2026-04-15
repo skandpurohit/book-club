@@ -164,8 +164,8 @@ function buildInlineRating(book, session, myRating) {
     if (!saveBtn) return;
 
     if (myRating && !allowEdit) {
+      container.querySelectorAll('.star-radio').forEach(r => r.disabled = true);
       container.querySelectorAll('.star').forEach(s => s.style.cursor = 'default');
-      container.style.pointerEvents = 'none';
       saveBtn.disabled = true;
       saveBtn.title = 'Editing ratings is disabled';
       return;
@@ -195,7 +195,7 @@ function buildInlineRating(book, session, myRating) {
     <div class="rating-panel">
       <div class="rating-panel__title">${myRating ? 'Your rating' : 'Rate this book'}</div>
       <div class="rating-panel__stars-row">
-        ${App.starsHTML(existing, { interactive: true, bookId: book.id })}
+        ${App.starsHTML(existing, { interactive: true, bookId: book.id, id: widgetId })}
         <span id="${widgetId}-label" class="rating-panel__selected-label">
           ${existing ? App.STAR_LABELS[existing] : 'Tap a star'}
         </span>

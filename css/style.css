@@ -539,36 +539,32 @@ textarea.form-control {
   user-select: none;
 }
 .star--filled { color: var(--clr-star); }
+/* Hidden radio inputs — visually gone but still functional for native tap handling */
+.star-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+/* Interactive stars use <label> elements — natively tappable on all browsers */
 .stars--interactive {
-  touch-action: manipulation; /* removes 300ms tap delay on mobile */
+  touch-action: manipulation;
 }
-/* Reset <button> so interactive stars look identical to display stars.
-   -webkit-appearance:none is required — without it iOS Safari applies its
-   own system button colour, making all stars appear selected.
-   Do NOT set color here; let .star and .star--filled control it. */
-button.star {
-  -webkit-appearance: none;
-  appearance: none;
-  background: none;
-  border: none;
-  padding: 0.6rem 0.25rem; /* gives ~44px tap height without changing visual size */
-  margin: 0;
-  font: inherit;
+.stars--interactive .star {
+  cursor: pointer;
+  /* Generous tap target via padding — keeps visual star size unchanged */
+  padding: 0.45rem 0.15rem;
+  display: inline-block;
   line-height: 1;
-  /* color intentionally omitted — .star sets empty colour, .star--filled sets filled */
 }
-button.star:focus-visible {
-  outline: 2px solid var(--clr-accent);
-  border-radius: var(--radius-xs);
-}
-.stars--interactive .star { cursor: pointer; }
 .stars--interactive .star:hover,
 .stars--interactive .star--hover { color: var(--clr-star); transform: scale(1.12); }
 .stars--sm .star { font-size: 1rem; }
 .stars--lg .star { font-size: 1.6rem; }
-/* On touch devices avoid the hover colour persisting between taps */
 @media (hover: none) {
-  .stars--interactive .star:hover { color: inherit; transform: none; }
+  /* Don't persist hover colour on touch screens */
+  .stars--interactive .star:hover { color: var(--clr-star-empty); transform: none; }
   .stars--interactive .star--filled:hover { color: var(--clr-star); }
 }
 .star-label {
